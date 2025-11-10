@@ -617,8 +617,9 @@ function copyReferralLink() {
 
 function shareReferralLink() {
     if (window.Telegram?.WebApp) {
+        const shareMessage = 'Присоединяйся к игре! (Что бы тот кто тебя пригласил получил бонус при переходе в бота пропиши /start а только потом заходи в игру) Моя реферальная ссылка:'; // Customize this message
         window.Telegram.WebApp.openTelegramLink(
-            `https://t.me/share/url?url=${encodeURIComponent(game.referralLink)}&text=${encodeURIComponent('Присоединяйся к игре!')}`
+            `https://t.me/share/url?url=${encodeURIComponent(game.referralLink)}&text=${encodeURIComponent(shareMessage)}`
         );
     } else if (navigator.share) {
         navigator.share({
