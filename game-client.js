@@ -10,7 +10,7 @@ class ClickerGameClient {
         this.referralEarned = 0;
         this.referralLink = '';
         this.isLoading = false;
-        this.isAdmin = false;
+        this.isAdmin = false;re
         this.apiUrl = '/api/game';
         
         this.init();
@@ -208,7 +208,7 @@ class ClickerGameClient {
         if (!this.botUsername) {
             this.botUsername = 'PhilipMorrisCoin_Bot';
         }
-        this.referralLink = `https://t.me/${this.botUsername}/?startapp=${this.userId}`;
+        this.referralLink = `https://t.me/${this.botUsername}/start?startapp=${this.userId}`;
     }
 
     formatNumber(num) {
