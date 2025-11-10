@@ -318,3 +318,8 @@ MIT License - свободно изменяйте и используйте дл
 ## Авторы
 
 Создано с ❤️ для платформы Telegram Mini Apps
+
+
+Пуш проекта: 
+1. Репозиторий https://github.com/miloserdow-artem/telegram-clicker-game.git
+git pull origin main

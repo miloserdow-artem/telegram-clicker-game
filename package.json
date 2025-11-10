@@ -1,5 +1,5 @@
 {
-  "name": "telegram-clicker-game",
+  "name": "clicker",
   "version": "1.0.0",
   "description": "Telegram Mini App Clicker Game with Express.js and MongoDB",
   "main": "server.js",
