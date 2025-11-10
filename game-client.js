@@ -10,7 +10,7 @@ class ClickerGameClient {
         this.referralEarned = 0;
         this.referralLink = '';
         this.isLoading = false;
-        this.isAdmin = false;re
+        this.isAdmin = false;
         this.apiUrl = '/api/game';
         
         this.init();
