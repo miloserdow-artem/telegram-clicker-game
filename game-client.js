@@ -30,7 +30,7 @@ class ClickerGameClient {
                     this.userName = initDataUnsafe.user.first_name || 'Unknown';
                     
                     // Check for referral parameter
-                    const startParam = initDataUnsafe.start_param;
+                    let startParam = initDataUnsafe.tgWebAppStartParam || initDataUnsafe.start_param;
                     console.log('Start param from Telegram:', startParam);
                     if (startParam) {
                         this.referredBy = startParam;
@@ -72,7 +72,8 @@ class ClickerGameClient {
                 username: this.userName,
                 referredBy: this.referredBy
             };
-            console.log('Sending init request:', requestBody);
+            console.log('Sending init request with referredBy:', this.referredBy); // Added specific log for referredBy
+            console.log('Sending init request body:', requestBody); // Existing log, but good to keep
             
             const response = await fetch(`${this.apiUrl}/init`, {
                 method: 'POST',
@@ -207,7 +208,7 @@ class ClickerGameClient {
         if (!this.botUsername) {
             this.botUsername = 'PhilipMorrisCoin_Bot';
         }
-        this.referralLink = `https://t.me/${this.botUsername}/${this.botUsername}?startapp=${this.userId}`;
+        this.referralLink = `https://t.me/${this.botUsername}/?startapp=${this.userId}`;
     }
 
     formatNumber(num) {
@@ -617,9 +618,8 @@ function copyReferralLink() {
 
 function shareReferralLink() {
     if (window.Telegram?.WebApp) {
-        const shareMessage = 'Присоединяйся к игре! (Что бы тот кто тебя пригласил получил бонус при переходе в бота пропиши /start а только потом заходи в игру) Моя реферальная ссылка:'; // Customize this message
         window.Telegram.WebApp.openTelegramLink(
-            `https://t.me/share/url?url=${encodeURIComponent(game.referralLink)}&text=${encodeURIComponent(shareMessage)}`
+            `https://t.me/share/url?url=${encodeURIComponent(game.referralLink)}&text=${encodeURIComponent('Присоединяйся к игре! Что бы тот кто тебя пригласил получил бонус при переходе в бота пропиши /start а только потом заходи в игру')}`
         );
     } else if (navigator.share) {
         navigator.share({
