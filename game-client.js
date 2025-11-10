@@ -29,8 +29,17 @@ class ClickerGameClient {
                     this.userId = initDataUnsafe.user.id.toString();
                     this.userName = initDataUnsafe.user.first_name || 'Unknown';
                     
-                    // Check for referral parameter
-                    let startParam = initDataUnsafe.tgWebAppStartParam || initDataUnsafe.start_param;
+                    // Check for referral parameter from initData
+                    let startParam = null;
+                    if (window.Telegram.WebApp.initData) {
+                        const params = new URLSearchParams(window.Telegram.WebApp.initData);
+                        startParam = params.get('start_param');
+                    }
+                    // Fallback to initDataUnsafe if parsing from initData fails or is not present
+                    if (!startParam) {
+                        startParam = initDataUnsafe.tgWebAppStartParam || initDataUnsafe.start_param;
+                    }
+
                     console.log('Start param from Telegram:', startParam);
                     if (startParam) {
                         this.referredBy = startParam;
