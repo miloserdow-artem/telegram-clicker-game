@@ -213,7 +213,7 @@ class ClickerGameClient {
     formatNumber(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-        return Math.floor(num).toString();
+        return num.toFixed(2); // Display two decimal places for numbers less than 1000
     }
 
     showNotification(message) {
