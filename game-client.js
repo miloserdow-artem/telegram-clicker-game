@@ -30,7 +30,7 @@ class ClickerGameClient {
                     this.userName = initDataUnsafe.user.first_name || 'Unknown';
                     
                     // Check for referral parameter from initData
-                    let startParam = null;
+                    const startParam = initDataUnsafe.start_param;
                     if (window.Telegram.WebApp.initData) {
                         const params = new URLSearchParams(window.Telegram.WebApp.initData);
                         startParam = params.get('start_param');
@@ -81,8 +81,6 @@ class ClickerGameClient {
                 username: this.userName,
                 referredBy: this.referredBy
             };
-            console.log('Client-side referredBy before sending init:', this.referredBy); // Added explicit log
-            console.log('Sending init request body:', requestBody);
             
             const response = await fetch(`${this.apiUrl}/init`, {
                 method: 'POST',

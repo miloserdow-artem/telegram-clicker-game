@@ -36,7 +36,6 @@ router.post('/init', verifyTelegramAuth, async (req, res) => {
   try {
     const { telegramId, username, referredBy } = req.body;
     
-    console.log('Received init request body:', req.body); // Добавлено логирование всего тела запроса
     console.log('Init request:', { telegramId, username, referredBy });
     
     let user = await User.findOne({ telegramId });
