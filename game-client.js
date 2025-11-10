@@ -81,8 +81,8 @@ class ClickerGameClient {
                 username: this.userName,
                 referredBy: this.referredBy
             };
-            console.log('Sending init request with referredBy:', this.referredBy); // Added specific log for referredBy
-            console.log('Sending init request body:', requestBody); // Existing log, but good to keep
+            console.log('Client-side referredBy before sending init:', this.referredBy); // Added explicit log
+            console.log('Sending init request body:', requestBody);
             
             const response = await fetch(`${this.apiUrl}/init`, {
                 method: 'POST',

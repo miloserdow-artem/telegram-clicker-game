@@ -58,9 +58,14 @@ router.post('/init', verifyTelegramAuth, async (req, res) => {
       // Handle referral
       if (referredBy && referredBy !== telegramId) {
         console.log('Processing referral:', { referredBy, telegramId });
+        console.log(`Attempting to find referrer with telegramId: ${referredBy} (type: ${typeof referredBy})`);
         const referrer = await User.findOne({ telegramId: referredBy });
         if (referrer) {
           console.log('Referrer found:', referrer.telegramId, referrer.username);
+        } else {
+          console.log('Referrer not found in DB for telegramId:', referredBy);
+        }
+        if (referrer) {
           const referralReward = parseInt(process.env.REFERRAL_REWARD) || 1000000;
           referrer.balance += referralReward;
           referrer.referralCount += 1;
