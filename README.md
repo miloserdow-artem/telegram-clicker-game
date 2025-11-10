@@ -321,5 +321,7 @@ MIT License - свободно изменяйте и используйте дл
 
 
 Пуш проекта: 
-1. Репозиторий https://github.com/miloserdow-artem/telegram-clicker-game.git
+Репозиторий https://github.com/miloserdow-artem/telegram-clicker-game.git
+в терминале на сервере:
 git pull origin main
+pm2 restart telegram-clicker-game
