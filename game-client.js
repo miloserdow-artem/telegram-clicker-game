@@ -17,6 +17,17 @@ class ClickerGameClient {
         this.bombs = 0;
         this.shields = 0;
         this.shieldActiveUntil = null; // Date object
+
+        // New upgrade properties for bomb and shield
+        this.bombUpgradeLevel = 0;
+        this.bombUpgradePrice = 0;
+        this.currentBombDamage = 0;
+        this.nextBombDamage = 0;
+
+        this.shieldUpgradeLevel = 0;
+        this.shieldUpgradePrice = 0;
+        this.currentShieldDuration = 0;
+        this.nextShieldDuration = 0;
         
         this.init();
     }
@@ -92,6 +103,17 @@ class ClickerGameClient {
                 this.bombs = data.user.bombs || 0;
                 this.shields = data.user.shields || 0;
                 this.shieldActiveUntil = data.user.shieldActiveUntil ? new Date(data.user.shieldActiveUntil) : null;
+
+                // Load bonus upgrade data
+                this.bombUpgradeLevel = data.user.bombUpgradeLevel || 0;
+                this.bombUpgradePrice = data.user.bombUpgradePrice || 0;
+                this.currentBombDamage = data.user.currentBombDamage || 0;
+                this.nextBombDamage = data.user.nextBombDamage || 0;
+
+                this.shieldUpgradeLevel = data.user.shieldUpgradeLevel || 0;
+                this.shieldUpgradePrice = data.user.shieldUpgradePrice || 0;
+                this.currentShieldDuration = data.user.currentShieldDuration || 0;
+                this.nextShieldDuration = data.user.nextShieldDuration || 0;
                 
                 if (data.user.offlineEarnings > 0) {
                     this.showNotification(`Вы заработали ${this.formatNumber(data.user.offlineEarnings)} монет офлайн!`);
@@ -207,6 +229,7 @@ class ClickerGameClient {
         document.getElementById('income').textContent = `Доход: ${this.formatNumber(this.incomePerSecond)}/сек`;
         this.updateReferralUI();
         this.updateBonusUI(); // Update new bonus UI
+        this.updateBonusUpgradeUI(); // Update bonus upgrade UI
     }
 
     updateBalance() {
@@ -278,7 +301,32 @@ class ClickerGameClient {
 
     showNotification(message) {
         console.log('Notification:', message);
-        // Could add visual notification here
+        
+        const notificationContainer = document.getElementById('customNotificationContainer');
+        if (!notificationContainer) {
+            console.error('Notification container not found!');
+            return;
+        }
+
+        const notification = document.createElement('div');
+        notification.className = 'custom-notification';
+        notification.innerHTML = `
+            <span>${message}</span>
+            <button class="notification-close-btn">✖</button>
+        `;
+        
+        notificationContainer.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        const timeoutId = setTimeout(() => {
+            notification.remove();
+        }, 5000);
+
+        // Remove on close button click
+        notification.querySelector('.notification-close-btn').addEventListener('click', () => {
+            clearTimeout(timeoutId);
+            notification.remove();
+        });
     }
 
     // Bonus methods
@@ -583,6 +631,134 @@ class ClickerGameClient {
         }
     }
 
+    // Bonus Upgrades methods
+    async loadBonusUpgrades() {
+        try {
+            const response = await fetch(`${this.apiUrl}/upgrades/bonus`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId: this.userId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                this.bombUpgradeLevel = data.bombUpgrade.level;
+                this.bombUpgradePrice = data.bombUpgrade.price;
+                this.currentBombDamage = data.bombUpgrade.currentDamage;
+                this.nextBombDamage = data.bombUpgrade.nextDamage;
+
+                this.shieldUpgradeLevel = data.shieldUpgrade.level;
+                this.shieldUpgradePrice = data.shieldUpgrade.price;
+                this.currentShieldDuration = data.shieldUpgrade.currentDuration;
+                this.nextShieldDuration = data.shieldUpgrade.nextDuration;
+                
+                this.displayBonusUpgrades();
+            }
+        } catch (error) {
+            console.error('Load bonus upgrades error:', error);
+        }
+    }
+
+    displayBonusUpgrades() {
+        const list = document.getElementById('bonusUpgradeList');
+        if (!list) return;
+
+        const canAffordBomb = this.balance >= this.bombUpgradePrice;
+        const canAffordShield = this.balance >= this.shieldUpgradePrice;
+
+        list.innerHTML = `
+            <!-- Bomb Upgrade -->
+            <div class="upgrade-item">
+                <div class="upgrade-header">
+                    <div class="upgrade-name">💣 Улучшение Бомбы (${this.bombUpgradeLevel})</div>
+                    <div class="upgrade-price">${this.formatNumber(this.bombUpgradePrice)}</div>
+                </div>
+                <div class="upgrade-description">
+                    Увеличивает урон бомбы в 1.2 раза. Текущий урон: ${this.formatNumber(this.currentBombDamage)}. Следующий урон: ${this.formatNumber(this.nextBombDamage)}.
+                </div>
+                <button class="buy-btn" id="buyBombUpgradeBtn" ${canAffordBomb ? '' : 'disabled'} 
+                        onclick="game.buyBombUpgrade()">
+                    Купить
+                </button>
+            </div>
+
+            <!-- Shield Upgrade -->
+            <div class="upgrade-item">
+                <div class="upgrade-header">
+                    <div class="upgrade-name">🛡️ Улучшение Щита (${this.shieldUpgradeLevel})</div>
+                    <div class="upgrade-price">${this.formatNumber(this.shieldUpgradePrice)}</div>
+                </div>
+                <div class="upgrade-description">
+                    Увеличивает время действия щита на 10 минут. Текущее время: ${this.currentShieldDuration}ч. Следующее время: ${this.nextShieldDuration}ч.
+                </div>
+                <button class="buy-btn" id="buyShieldUpgradeBtn" ${canAffordShield ? '' : 'disabled'} 
+                        onclick="game.buyShieldUpgrade()">
+                    Купить
+                </button>
+            </div>
+        `;
+    }
+
+    updateBonusUpgradeUI() {
+        // This function will be called by updateUI to ensure the upgrade prices and levels are always current
+        // It essentially re-renders the bonus upgrade section if it's visible
+        if (document.getElementById('bonusUpgradeTab')?.classList.contains('active')) {
+            this.displayBonusUpgrades();
+        }
+    }
+
+    async buyBombUpgrade() {
+        try {
+            const response = await fetch(`${this.apiUrl}/upgrades/bomb/buy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId: this.userId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                this.balance = data.balance;
+                this.bombUpgradeLevel = data.bombUpgrade.level;
+                this.bombUpgradePrice = data.bombUpgrade.price;
+                this.currentBombDamage = data.bombUpgrade.currentDamage;
+                this.nextBombDamage = data.bombUpgrade.nextDamage;
+                this.updateUI();
+                this.showNotification('Улучшение бомбы куплено!');
+            } else {
+                alert(data.message || 'Не удалось купить улучшение бомбы.');
+            }
+        } catch (error) {
+            console.error('Buy bomb upgrade error:', error);
+            alert('Ошибка при покупке улучшения бомбы.');
+        }
+    }
+
+    async buyShieldUpgrade() {
+        try {
+            const response = await fetch(`${this.apiUrl}/upgrades/shield/buy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId: this.userId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                this.balance = data.balance;
+                this.shieldUpgradeLevel = data.shieldUpgrade.level;
+                this.shieldUpgradePrice = data.shieldUpgrade.price;
+                this.currentShieldDuration = data.shieldUpgrade.currentDuration;
+                this.nextShieldDuration = data.shieldUpgrade.nextDuration;
+                this.updateUI();
+                this.showNotification('Улучшение щита куплено!');
+            } else {
+                alert(data.message || 'Не удалось купить улучшение щита.');
+            }
+        } catch (error) {
+            console.error('Buy shield upgrade error:', error);
+            alert('Ошибка при покупке улучшения щита.');
+        }
+    }
+
     async activatePromo() {
         const promoInput = document.getElementById('promoInput');
         const code = promoInput.value.trim();
@@ -855,9 +1031,9 @@ function switchBonusTab(tabName) {
     } else if (tabName === 'click') {
         document.getElementById('clickTab').classList.add('active');
         game.loadClickUpgrades();
-    } else if (tabName === 'referral') {
-        document.getElementById('referralTab').classList.add('active');
-        game.updateReferralUI();
+    } else if (tabName === 'bonus-upgrade') {
+        document.getElementById('bonusUpgradeTab').classList.add('active');
+        game.loadBonusUpgrades();
     }
 }
 

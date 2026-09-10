@@ -2,8 +2,8 @@
 const PASSIVE_UPGRADES = [
   {
     id: 1,
-    name: 'Кириешки',
-    description: 'ХАхахахаххпхп',
+    name: 'Уровень 1',
+    description: 'Описание',
     basePrice: 100,
     baseIncome: 0.01,
     priceMultiplier: 1.2,
@@ -11,8 +11,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 2,
-    name: 'Кириешки 2',
-    description: 'Тоже самое что первое только покруче',
+    name: 'Уровень 2',
+    description: 'Описание',
     basePrice: 1000,
     baseIncome: 0.1,
     priceMultiplier: 1.2,
@@ -20,8 +20,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 3,
-    name: 'Кириешки 3',
-    description: 'С холодцом и хреном',
+    name: 'Уровень 3',
+    description: 'Описание',
     basePrice: 10000,
     baseIncome: 1,
     priceMultiplier: 1.2,
@@ -29,8 +29,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 4,
-    name: 'Чивапчичи',
-    description: 'Хз просто слово смешное',
+    name: 'Уровень 4',
+    description: 'Описание',
     basePrice: 100000,
     baseIncome: 5,
     priceMultiplier: 1.2,
@@ -38,8 +38,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 5,
-    name: 'Чивапчичи 2',
-    description: 'Ну типо ты крут если купил',
+    name: 'Уровень 5',
+    description: 'Описание',
     basePrice: 1000000,
     baseIncome: 25,
     priceMultiplier: 1.2,
@@ -47,8 +47,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 6,
-    name: 'Чивапчичи 3',
-    description: 'Будто фильм Чивапчичи: 3',
+    name: 'Уровень 6',
+    description: 'Описание',
     basePrice: 10000000,
     baseIncome: 100,
     priceMultiplier: 1.2,
@@ -56,8 +56,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 7,
-    name: 'Артёмчик и Костик',
-    description: 'Да да мы',
+    name: 'Уровень 7',
+    description: 'Описание',
     basePrice: 100000000,
     baseIncome: 500,
     priceMultiplier: 1.2,
@@ -65,8 +65,8 @@ const PASSIVE_UPGRADES = [
   },
   {
     id: 8,
-    name: 'Филип Моррис!',
-    description: 'Самый высокий статус',
+    name: 'Уровень 8',
+    description: 'Описание',
     basePrice: 1000000000,
     baseIncome: 2500,
     priceMultiplier: 1.2,
@@ -78,8 +78,8 @@ const PASSIVE_UPGRADES = [
 const CLICK_UPGRADES = [
   {
     id: 1,
-    name: 'Лох',
-    description: 'Не придумал описание',
+    name: 'Уровень 1',
+    description: 'Описание',
     basePrice: 200,
     clickBoost: 1,
     priceMultiplier: 1.7,
@@ -87,8 +87,8 @@ const CLICK_UPGRADES = [
   },
   {
     id: 2,
-    name: 'Нормис',
-    description: 'Ну ты уже чего то достиг',
+    name: 'Уровень 2',
+    description: 'Описание',
     basePrice: 2000,
     clickBoost: 2,
     priceMultiplier: 1.7,
@@ -96,8 +96,8 @@ const CLICK_UPGRADES = [
   },
   {
     id: 3,
-    name: 'Среднячок',
-    description: 'Давай побольше, ок?',
+    name: 'Уровень 3',
+    description: 'Описание',
     basePrice: 20000,
     clickBoost: 5,
     priceMultiplier: 1.7,
@@ -105,8 +105,8 @@ const CLICK_UPGRADES = [
   },
   {
     id: 4,
-    name: 'Норм чел',
-    description: 'Не дать не взять',
+    name: 'Уровень 4',
+    description: 'Описание',
     basePrice: 200000,
     clickBoost: 10,
     priceMultiplier: 1.7,
@@ -114,8 +114,8 @@ const CLICK_UPGRADES = [
   },
   {
     id: 5,
-    name: 'Крутой',
-    description: 'Мы начинаем тебя уважать',
+    name: 'Уровень 5',
+    description: 'Описание',
     basePrice: 2000000,
     clickBoost: 25,
     priceMultiplier: 1.7,
@@ -123,14 +123,30 @@ const CLICK_UPGRADES = [
   },
   {
     id: 6,
-    name: 'Мега крутой',
-    description: 'Реально респект',
+    name: 'Уровень 6',
+    description: 'Описание',
     basePrice: 20000000,
     clickBoost: 50,
     priceMultiplier: 1.7,
     icon: '🌟'
   }
 ];
+
+// Bomb Upgrade
+const BOMB_UPGRADE = {
+  initialDamage: 100000,
+  damageMultiplier: 1.2,
+  basePrice: 50000,
+  priceMultiplier: 1.2
+};
+
+// Shield Upgrade
+const SHIELD_UPGRADE = {
+  initialDurationMinutes: 180, // 3 hours
+  durationIncreaseMinutes: 10,
+  basePrice: 500000,
+  priceMultiplier: 1.2
+};
 
 // Helper functions
 function calculateUpgradePrice(basePrice, level, multiplier) {
@@ -145,6 +161,14 @@ function calculateClickBoost(baseBoost, level) {
   return baseBoost * level;
 }
 
+function calculateBombDamage(level) {
+  return Math.floor(BOMB_UPGRADE.initialDamage * Math.pow(BOMB_UPGRADE.damageMultiplier, level));
+}
+
+function calculateShieldDuration(level) {
+  return SHIELD_UPGRADE.initialDurationMinutes + (SHIELD_UPGRADE.durationIncreaseMinutes * level);
+}
+
 function getPassiveUpgrade(id) {
   return PASSIVE_UPGRADES.find(u => u.id === id);
 }
@@ -156,9 +180,13 @@ function getClickUpgrade(id) {
 module.exports = {
   PASSIVE_UPGRADES,
   CLICK_UPGRADES,
+  BOMB_UPGRADE,
+  SHIELD_UPGRADE,
   calculateUpgradePrice,
   calculateUpgradeIncome,
   calculateClickBoost,
+  calculateBombDamage,
+  calculateShieldDuration,
   getPassiveUpgrade,
   getClickUpgrade
 };

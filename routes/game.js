@@ -8,9 +8,13 @@ const crypto = require('crypto-js');
 const {
   PASSIVE_UPGRADES,
   CLICK_UPGRADES,
+  BOMB_UPGRADE,
+  SHIELD_UPGRADE,
   calculateUpgradePrice,
   calculateUpgradeIncome,
   calculateClickBoost,
+  calculateBombDamage,
+  calculateShieldDuration,
   getPassiveUpgrade,
   getClickUpgrade
 } = require('../config/upgrades');
@@ -115,7 +119,9 @@ router.post('/init', verifyTelegramAuth, async (req, res) => {
         botUsername: process.env.BOT_USERNAME || 'PhilipMorrisCoin_Bot',
         bombs: user.bombs,
         shields: user.shields,
-        shieldActiveUntil: user.shieldActiveUntil
+        shieldActiveUntil: user.shieldActiveUntil,
+        bombUpgradeLevel: user.bombUpgradeLevel,
+        shieldUpgradeLevel: user.shieldUpgradeLevel
       }
     });
   } catch (error) {
@@ -392,6 +398,132 @@ router.post('/upgrades/click/buy', verifyTelegramAuth, async (req, res) => {
   }
 });
 
+// Get bonus upgrades
+router.post('/upgrades/bonus', verifyTelegramAuth, async (req, res) => {
+  try {
+    const { telegramId } = req;
+    const user = await User.findOne({ telegramId });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Bomb Upgrade details
+    const currentBombDamage = calculateBombDamage(user.bombUpgradeLevel);
+    const nextBombDamage = calculateBombDamage(user.bombUpgradeLevel + 1);
+    const bombUpgradePrice = calculateUpgradePrice(BOMB_UPGRADE.basePrice, user.bombUpgradeLevel, BOMB_UPGRADE.priceMultiplier);
+
+    // Shield Upgrade details
+    const currentShieldDuration = calculateShieldDuration(user.shieldUpgradeLevel);
+    const nextShieldDuration = calculateShieldDuration(user.shieldUpgradeLevel + 1);
+    const shieldUpgradePrice = calculateUpgradePrice(SHIELD_UPGRADE.basePrice, user.shieldUpgradeLevel, SHIELD_UPGRADE.priceMultiplier);
+
+    res.json({
+      success: true,
+      bombUpgrade: {
+        level: user.bombUpgradeLevel,
+        price: bombUpgradePrice,
+        currentDamage: currentBombDamage,
+        nextDamage: nextBombDamage,
+        canAfford: user.balance >= bombUpgradePrice
+      },
+      shieldUpgrade: {
+        level: user.shieldUpgradeLevel,
+        price: shieldUpgradePrice,
+        currentDuration: currentShieldDuration,
+        nextDuration: nextShieldDuration,
+        canAfford: user.balance >= shieldUpgradePrice
+      }
+    });
+
+  } catch (error) {
+    console.error('Get bonus upgrades error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get bonus upgrades' });
+  }
+});
+
+// Buy bomb upgrade
+router.post('/upgrades/bomb/buy', verifyTelegramAuth, async (req, res) => {
+  try {
+    const { telegramId } = req;
+    const user = await User.findOne({ telegramId });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const price = calculateUpgradePrice(BOMB_UPGRADE.basePrice, user.bombUpgradeLevel, BOMB_UPGRADE.priceMultiplier);
+
+    if (user.balance < price) {
+      return res.status(400).json({ success: false, message: 'Недостаточно средств для улучшения бомбы.' });
+    }
+
+    user.balance -= price;
+    user.bombUpgradeLevel += 1;
+    await user.save();
+
+    const currentBombDamage = calculateBombDamage(user.bombUpgradeLevel);
+    const nextBombDamage = calculateBombDamage(user.bombUpgradeLevel + 1);
+    const newBombUpgradePrice = calculateUpgradePrice(BOMB_UPGRADE.basePrice, user.bombUpgradeLevel, BOMB_UPGRADE.priceMultiplier);
+
+    res.json({
+      success: true,
+      balance: user.balance,
+      bombUpgrade: {
+        level: user.bombUpgradeLevel,
+        price: newBombUpgradePrice,
+        currentDamage: currentBombDamage,
+        nextDamage: nextBombDamage
+      }
+    });
+
+  } catch (error) {
+    console.error('Buy bomb upgrade error:', error);
+    res.status(500).json({ success: false, message: 'Failed to buy bomb upgrade' });
+  }
+});
+
+// Buy shield upgrade
+router.post('/upgrades/shield/buy', verifyTelegramAuth, async (req, res) => {
+  try {
+    const { telegramId } = req;
+    const user = await User.findOne({ telegramId });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const price = calculateUpgradePrice(SHIELD_UPGRADE.basePrice, user.shieldUpgradeLevel, SHIELD_UPGRADE.priceMultiplier);
+
+    if (user.balance < price) {
+      return res.status(400).json({ success: false, message: 'Недостаточно средств для улучшения щита.' });
+    }
+
+    user.balance -= price;
+    user.shieldUpgradeLevel += 1;
+    await user.save();
+
+    const currentShieldDuration = calculateShieldDuration(user.shieldUpgradeLevel);
+    const nextShieldDuration = calculateShieldDuration(user.shieldUpgradeLevel + 1);
+    const newShieldUpgradePrice = calculateUpgradePrice(SHIELD_UPGRADE.basePrice, user.shieldUpgradeLevel, SHIELD_UPGRADE.priceMultiplier);
+
+    res.json({
+      success: true,
+      balance: user.balance,
+      shieldUpgrade: {
+        level: user.shieldUpgradeLevel,
+        price: newShieldUpgradePrice,
+        currentDuration: currentShieldDuration,
+        nextDuration: nextShieldDuration
+      }
+    });
+
+  } catch (error) {
+    console.error('Buy shield upgrade error:', error);
+    res.status(500).json({ success: false, message: 'Failed to buy shield upgrade' });
+  }
+});
+
 // Get leaderboard by balance
 router.get('/leaderboard/balance', async (req, res) => {
   try {
@@ -632,7 +764,13 @@ router.post('/promo/activate', verifyTelegramAuth, async (req, res) => {
     }
     
     // Award the reward
-    user.balance += promoCode.reward;
+    if (promoCode.reward.type === 'coins') {
+      user.balance += promoCode.reward.amount;
+    } else if (promoCode.reward.type === 'bomb') {
+      user.bombs += promoCode.reward.amount;
+    } else if (promoCode.reward.type === 'shield') {
+      user.shields += promoCode.reward.amount;
+    }
     user.claimedPromoCodes.push(code.toUpperCase());
     await user.save();
     
@@ -643,8 +781,11 @@ router.post('/promo/activate', verifyTelegramAuth, async (req, res) => {
     res.json({
       success: true,
       message: 'Ты активировал промокод',
-      reward: promoCode.reward,
-      balance: user.balance
+      rewardType: promoCode.reward.type,
+      rewardAmount: promoCode.reward.amount,
+      balance: user.balance,
+      bombs: user.bombs,
+      shields: user.shields
     });
   } catch (error) {
     console.error('Activate promo error:', error);
@@ -693,7 +834,7 @@ router.post('/useBomb', verifyTelegramAuth, async (req, res) => {
       });
     }
 
-    const BOMB_DAMAGE = parseInt(process.env.BOMB_DAMAGE) || 300000;
+    const BOMB_DAMAGE = calculateBombDamage(user.bombUpgradeLevel); // Use upgraded bomb damage
     targetUser.balance = Math.max(0, targetUser.balance - BOMB_DAMAGE);
     user.bombs -= 1;
 
@@ -727,9 +868,9 @@ router.post('/activateShield', verifyTelegramAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'У вас нет щитов!' });
     }
 
-    const SHIELD_DURATION_HOURS = parseInt(process.env.SHIELD_DURATION_HOURS) || 3;
+    const SHIELD_DURATION_MINUTES = calculateShieldDuration(user.shieldUpgradeLevel); // Use upgraded shield duration
     const now = new Date();
-    const shieldEndTime = new Date(now.getTime() + SHIELD_DURATION_HOURS * 60 * 60 * 1000);
+    const shieldEndTime = new Date(now.getTime() + SHIELD_DURATION_MINUTES * 60 * 1000); // Convert minutes to milliseconds
 
     user.shieldActiveUntil = shieldEndTime;
     user.shields -= 1;

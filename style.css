@@ -1,0 +1,823 @@
+:root {
+    /* Основной красный цвет градиента фона (левый край) */
+    --color-gradient-start: #ff3b3b;
+    
+    /* Дополнительный красный цвет градиента фона (правый край) */
+    --color-gradient-end: #ff0055;
+
+    /* Цвет текста по умолчанию */
+    --color-text-white: #ffffff;
+
+    /* Полупрозрачный чёрный для фонов (0.2) */
+    --bg-overlay-20: rgba(0, 0, 0, 0.2);
+
+    /* Полупрозрачный чёрный для фонов (0.3) */
+    --bg-overlay-30: rgba(0, 0, 0, 0.3);
+
+    /* Полупрозрачный чёрный для фонов (0.8) */
+    --bg-overlay-80: rgba(0, 0, 0, 0.8);
+
+    /* Тёмно-красный цвет для модального окна */
+    --color-modal-dark: #410606;
+
+    /* Золотой цвет (награды, цены) */
+    --color-gold: #ffd700;
+
+    /* Зелёный цвет кнопки «Купить» (основной) */
+    --color-green-main: #4CAF50;
+
+    /* Зелёный цвет кнопки «Купить» при наведении */
+    --color-green-hover: #45a049;
+
+    /* Серый цвет для неактивных элементов */
+    --color-gray-600: #666;
+
+    /* Синий цвет кнопок действий (задания) */
+    --color-blue-main: #2196F3;
+
+    /* Синий цвет кнопок при наведении */
+    --color-blue-hover: #1976D2;
+
+    /* Красный цвет для ошибок */
+    --color-error-main: #f44336;
+    --color-error-bg: rgba(244, 67, 54, 0.3);
+}
+
+/* Стили для улучшенной мобильной поддержки */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none; /* Достаточно одного универсального свойства */
+}
+
+body {
+    background: linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end));
+    color: var(--color-text-white);
+    height: 100vh;
+    overflow: hidden; /* Объединяем overflow-x и overflow-y */
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg-overlay-20);
+}
+
+.balance {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.income-per-second {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.game-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.coin {
+    width: 370px;
+    height: 370px;
+    background: url(main_coin_1.png) center no-repeat;
+    mix-blend-mode: multiply;
+    background-size: 100%;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 20px 40px var(--bg-overlay-30);
+}
+
+.coin:active,
+.coin.clicked {
+    transform: scale(0.95);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.click-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--color-text-white);
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 10;
+}
+
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-100px); }
+}
+
+.bottom-nav {
+    display: flex;
+    background: var(--bg-overlay-30);
+    padding: 15px;
+    gap: 10px;
+}
+
+.nav-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--color-text-white);
+    padding: 15px 10px;
+    border-radius: 15px;
+    font-size: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+#nav-btn-faq {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    padding: 0;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay-80);
+    display: none;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: linear-gradient(to right, var(--color-gradient-end), var(--color-modal-dark));
+    margin: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--color-text-white);
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    touch-action: manipulation;
+}
+
+.top-list {
+    list-style: none;
+}
+
+.top-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-rank {
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.upgrade-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+
+.upgrade-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.upgrade-name {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.upgrade-price {
+    background: var(--color-gold);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.upgrade-description {
+    opacity: 0.8;
+    margin-bottom: 10px;
+}
+
+.buy-btn {
+    background: var(--color-green-main);
+    border: none;
+    color: var(--color-text-white);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.buy-btn:disabled {
+    background: var(--color-gray-600);
+    cursor: not-allowed;
+}
+
+.buy-btn:hover:not(:disabled) {
+    background: var(--color-green-hover);
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.7;
+}
+
+.faq-section {
+    margin-bottom: 20px;
+}
+
+.faq-question {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.faq-answer {
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* Стили для вкладок */
+.tab-container {
+    width: 100%;
+}
+
+.tab-buttons {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 5px;
+    margin-bottom: 20px;
+    gap: 5px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--color-text-white);
+    padding: 10px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+    touch-action: manipulation;
+}
+
+.tab-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+}
+
+.tab-content {
+    width: 100%;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Стили для реферальной системы */
+.referral-section,
+.promo-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.referral-section h3,
+.promo-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.referral-stats {
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.stat-label {
+    opacity: 0.8;
+}
+
+.stat-value {
+    font-weight: bold;
+    color: var(--color-gold);
+}
+
+.referral-link-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.referral-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--color-text-white);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.referral-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.copy-btn,
+.share-btn,
+.promo-btn {
+    width: auto;
+    background: var(--color-green-main);
+    border: none;
+    color: var(--color-text-white);
+    padding: 12px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    white-space: nowrap;
+    touch-action: manipulation;
+}
+
+.share-btn {
+    width: 100%;
+    background: var(--color-blue-main);
+}
+
+.promo-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.promo-input {
+    width: auto;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: var(--color-text-white);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.promo-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.promo-message {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    display: none;
+}
+
+.promo-message.success {
+    background: rgba(76, 175, 80, 0.3);
+    color: var(--color-green-main);
+    display: block;
+}
+
+.promo-message.error {
+    background: var(--color-error-bg);
+    color: var(--color-error-main);
+    display: block;
+}
+
+/* Стили для заданий */
+.task-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.task-title {
+    font-weight: bold;
+    font-size: 18px;
+    flex: 1;
+}
+
+.task-reward {
+    background: var(--color-gold);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.task-description {
+    opacity: 0.8;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.task-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.task-btn {
+    flex: 1;
+    background: var(--color-blue-main);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.task-btn:hover {
+    background: var(--color-blue-hover);
+}
+
+.task-btn.check-btn {
+    background: var(--color-green-main);
+}
+
+.task-btn.check-btn:hover {
+    background: var(--color-green-hover);
+}
+
+.task-btn:disabled {
+    background: var(--color-gray-600);
+    cursor: not-allowed;
+}
+
+.task-completed-badge {
+    background: var(--color-green-main);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 480px) {
+    .tab-btn {
+        font-size: 10px;
+        padding: 8px 4px;
+    }
+    
+    .referral-section, .promo-section {
+        padding: 15px;
+    }
+    
+    .referral-link-container {
+        flex-direction: column;
+    }
+
+    .promo-input-container {
+        flex-direction: column;
+    }
+
+    .promo-btn {
+        width: 100%;
+    }
+    
+    .copy-btn {
+        width: 100%;
+    }
+}
+
+/* Дополнительные стили для мобильных устройств */
+@media (max-width: 480px) {
+    .coin {
+        width: 220px;
+        height: 229px;
+        font-size: 42px;
+    }
+    
+    .balance {
+        font-size: 24px;
+    }
+    
+    .modal-content {
+        margin: 10px;
+        height: calc(100% - 20px);
+    }
+}
+
+@media (max-height: 600px) {
+    .coin {
+        width: 250px;
+        height: 250px;
+        font-size: 36px;
+    }
+    
+    .header {
+        padding: 7px;
+    }
+    
+    .bottom-nav {
+        padding: 10px;
+    }
+}
+
+/* Анимация пульсации для активности */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.coin.active-animation {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Стили для отображения бонусов */
+.bonus-display {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 0;
+    background: rgba(0, 0, 0, 0.158);
+    border-radius: 10px;
+    margin: 10px auto;
+    max-width: 300px;
+}
+
+.bonus-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgba(0, 0, 0, 0.342);
+    border-radius: 15%;
+    width: 45%;
+    height: 100%;
+    font-size: 14px;
+    opacity: 0.5; /* Полупрозрачный по умолчанию */
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.bonus-item.active {
+    opacity: 1; /* Полностью непрозрачный при наличии бонуса */
+}
+
+.bonus-icon {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.bonus-count {
+    font-weight: bold;
+}
+
+.shield-timer {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Стили для всплывающих сообщений */
+.alarm-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 1001;
+    opacity: 0;
+    animation: fadeInOut 2s forwards;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Стили для ежедневных наград */
+.daily-rewards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.daily-reward-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 7px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.daily-reward-item.claimed {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.daily-reward-item.claimable {
+    border: 2px solid var(--color-gold);
+}
+
+.reward-day {
+    font-weight: bold;
+    font-size: 15px;
+    width: 20%;
+}
+
+.reward-details {
+    flex: 1;
+    font-size: 18px;
+}
+
+.reward-action {
+    width: 40%;
+    text-align: right;
+}
+
+.claimed-badge, .unavailable-badge {
+    background: rgba(76, 175, 80, 0.3);
+    color: var(--color-green-main);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.unavailable-badge {
+    background: rgba(244, 67, 54, 0.3);
+    color: var(--color-error-main);
+}
+
+/* Styles for custom notifications */
+#customNotificationContainer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 90%;
+    align-items: center;
+}
+
+.custom-notification {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: slideInUp 0.3s ease-out forwards;
+}
+
+.custom-notification.hide {
+    animation: slideOutDown 0.3s ease-in forwards;
+}
+
+.notification-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%) translateX(-50%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) translateX(-50%);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0) translateX(-50%);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%) translateX(-50%);
+        opacity: 0;
+    }
+}

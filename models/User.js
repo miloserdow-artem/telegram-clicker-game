@@ -78,6 +78,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  bombUpgradeLevel: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  shieldUpgradeLevel: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   dailyRewardStreak: {
     type: Number,
     default: 0,
